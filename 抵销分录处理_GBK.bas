@@ -595,7 +595,7 @@ End Sub
 
 ' ============================================================
 ' 步骤6: 重新排序序号（A列）
-' 原始数据行（非小计、非补充分录）按组计数，每条完整分录一个序号
+' 同一小计区块内所有行（含补充分录和小计行）共用同一序号，便于筛选
 ' ============================================================
 Sub 步骤6_重新排序(ws As Worksheet)
     Dim lastRow As Long, i As Long
@@ -605,7 +605,10 @@ Sub 步骤6_重新排序(ws As Worksheet)
 
     ws.Range("A2:A" & lastRow).ClearContents
 
-    ' 按组编号：每个小计区块内的第一条原始数据行分配序号
+    ' 第一遍：找每个组的起止行，记录序号区间
+    ' 直接遍历：进入新组就分配序号，组内所有行（含补充分录、小计）都填同一序号
+    Dim curSeq As Long
+    curSeq = 0
     Dim inGroup As Boolean
     inGroup = False
 
@@ -615,16 +618,19 @@ Sub 步骤6_重新排序(ws As Worksheet)
         Dim kVal As String
         kVal = Trim(ws.Cells(i, 11).Value)
 
-        If bVal = "小计" Then
-            inGroup = False  ' 遇到小计，重置，下一组重新计数
-        ElseIf kVal = "补充分录" Or bVal = "" Then
-            ' 补充分录行和空行不编号，也不影响inGroup状态
+        If bVal = "" Then
+            ' 空行跳过，不编号
+        ElseIf Not inGroup Then
+            ' 新组第一行（包括第一条原始数据行或补充分录行）
+            curSeq = seqNum
+            seqNum = seqNum + 1
+            inGroup = True
+            ws.Cells(i, 1).Value = curSeq
         Else
-            ' 正常原始数据行
-            If Not inGroup Then
-                ws.Cells(i, 1).Value = seqNum
-                seqNum = seqNum + 1
-                inGroup = True
+            ' 同组内的后续行（原始行、补充分录行、小计行）填同一序号
+            ws.Cells(i, 1).Value = curSeq
+            If bVal = "小计" Then
+                inGroup = False  ' 小计标志本组结束
             End If
         End If
     Next i
