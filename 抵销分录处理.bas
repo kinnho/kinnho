@@ -525,8 +525,8 @@ Sub 合并分录(entries() As Variant, eCount As Integer, _
         key = keys(i)
         Dim totalAmt As Double
         totalAmt = 0
-        Dim b As String, c As String, e As String, rem As String
-        b = "": c = "": e = "": rem = ""
+        Dim b As String, c As String, e As String, remark As String
+        b = "": c = "": e = "": remark = ""
         Dim firstFound As Boolean
         firstFound = False
 
@@ -543,7 +543,7 @@ Sub 合并分录(entries() As Variant, eCount As Integer, _
 
             If ek = key Then
                 If Not firstFound Then
-                    b = CStr(ea(0)): c = CStr(ea(1)): e = CStr(ea(2)): rem = CStr(ea(4))
+                    b = CStr(ea(0)): c = CStr(ea(1)): e = CStr(ea(2)): remark = CStr(ea(4))
                     firstFound = True
                 End If
                 totalAmt = totalAmt + CDbl(ea(3))
@@ -552,7 +552,7 @@ Sub 合并分录(entries() As Variant, eCount As Integer, _
 
         If firstFound Then
             ReDim Preserve merged(mCount)
-            merged(mCount) = Array(b, c, e, totalAmt, rem)
+            merged(mCount) = Array(b, c, e, totalAmt, remark)
             mCount = mCount + 1
         End If
     Next i
